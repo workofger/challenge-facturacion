@@ -1,10 +1,9 @@
 // Configuration constants
 export const CONFIG = {
   // Expected receiver RFC for validation
-  // TODO: Configure with your company's RFC
   EXPECTED_RECEIVER_RFC: "XAXX010101000",
   
-  // API Base URL - configure when backend is ready
+  // API Base URL
   API_BASE_URL: import.meta.env.VITE_API_URL || "http://localhost:3001",
   
   // Supported currencies

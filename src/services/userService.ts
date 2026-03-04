@@ -1,8 +1,7 @@
 /**
  * User API Service
  * 
- * TODO: Implement real API calls. Currently returns mock data.
- * All user operations should go through backend API endpoints.
+ * Currently returns mock data for UI development.
  */
 
 // Store token in memory and localStorage
@@ -206,10 +205,7 @@ export function getStoredUserToken(): string | null {
 
 // ========== Authentication ==========
 
-/**
- * Login user
- * TODO: Replace with real API call to POST /api/user/login
- */
+/** Login user */
 export async function userLogin(
   email: string,
   password: string
@@ -235,10 +231,7 @@ export async function userLogout(): Promise<void> {
   setUserToken(null);
 }
 
-/**
- * Check current user session
- * TODO: Replace with real API call to GET /api/user/profile
- */
+/** Check current user session */
 export async function checkUserSession(): Promise<{
   isValid: boolean;
   user?: UserProfile;

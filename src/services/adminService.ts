@@ -1,8 +1,7 @@
 /**
  * Admin API Service
  * 
- * TODO: Implement real API calls. Currently returns mock data.
- * All admin operations should go through backend API endpoints.
+ * Currently returns mock data for UI development.
  */
 
 // Store token in memory (will be lost on page refresh)
@@ -255,10 +254,7 @@ export function getStoredToken(): string | null {
 
 // ========== Mock API Functions ==========
 
-/**
- * Login admin user
- * TODO: Replace with real API call to POST /api/admin/login
- */
+/** Login admin user */
 export async function adminLogin(
   email: string,
   password: string
@@ -281,10 +277,7 @@ export async function adminLogin(
   };
 }
 
-/**
- * Login admin user via Google OAuth
- * TODO: Replace with real API call to POST /api/admin/google-auth
- */
+/** Login admin user via Google OAuth */
 export async function adminGoogleLogin(
   credential: string
 ): Promise<{ success: boolean; admin?: AdminUser; message: string }> {
@@ -312,10 +305,7 @@ export async function adminLogout(): Promise<void> {
   setAuthToken(null);
 }
 
-/**
- * Check current session
- * TODO: Replace with real API call to GET /api/admin/session
- */
+/** Check current session */
 export async function checkSession(): Promise<{ 
   isValid: boolean; 
   admin?: AdminUser 
@@ -332,10 +322,7 @@ export async function checkSession(): Promise<{
   };
 }
 
-/**
- * Get dashboard stats
- * TODO: Replace with real API call to GET /api/admin/stats
- */
+/** Get dashboard stats */
 export async function getStats(): Promise<{
   success: boolean;
   stats?: DashboardStats;
@@ -363,10 +350,7 @@ export async function getStats(): Promise<{
   };
 }
 
-/**
- * Get invoices with filters
- * TODO: Replace with real API call to GET /api/admin/invoices
- */
+/** Get invoices with filters */
 export async function getInvoices(
   filters: InvoiceFilters = {}
 ): Promise<{
@@ -409,21 +393,14 @@ export async function getInvoices(
   };
 }
 
-/**
- * Export invoices to CSV
- * TODO: Replace with real API call to GET /api/admin/export
- */
+/** Export invoices to CSV */
 export async function exportInvoicesCSV(
   _filters: ExportFilters = {}
 ): Promise<{ success: boolean; message: string }> {
-  console.warn('TODO: Implement exportInvoicesCSV with real backend');
-  return { success: false, message: 'Exportación no implementada — conecta tu API backend' };
+  return { success: false, message: 'Not implemented' };
 }
 
-/**
- * Export invoices to JSON
- * TODO: Replace with real API call to GET /api/admin/export?format=json
- */
+/** Export invoices to JSON */
 export async function exportInvoicesJSON(
   _filters: ExportFilters = {}
 ): Promise<{
@@ -434,14 +411,11 @@ export async function exportInvoicesJSON(
   return {
     success: true,
     data: MOCK_INVOICES,
-    message: 'Mock data — conecta tu API backend para datos reales',
+    message: 'Mock data',
   };
 }
 
-/**
- * Export payments XLSX
- * TODO: Implement with real backend
- */
+/** Export payments XLSX */
 export interface PaymentExportFilters {
   week: number;
   year: number;
@@ -452,8 +426,7 @@ export interface PaymentExportFilters {
 export async function exportPaymentsXLSX(
   _filters: PaymentExportFilters
 ): Promise<{ success: boolean; message: string }> {
-  console.warn('TODO: Implement exportPaymentsXLSX with real backend');
-  return { success: false, message: 'Exportación de pagos no implementada — conecta tu API backend' };
+  return { success: false, message: 'Not implemented' };
 }
 
 // ========== System Config ==========
@@ -475,7 +448,7 @@ export async function getSystemConfig(_key?: string): Promise<{
   return {
     success: true,
     data: [],
-    message: 'TODO: Implement getSystemConfig',
+    message: 'Not implemented',
   };
 }
 
@@ -490,7 +463,7 @@ export async function updateSystemConfig(
 }> {
   return {
     success: false,
-    message: 'TODO: Implement updateSystemConfig',
+    message: 'Not implemented',
   };
 }
 
@@ -563,7 +536,7 @@ export async function createApiKey(_params: {
 }> {
   return {
     success: false,
-    message: 'TODO: Implement createApiKey',
+    message: 'Not implemented',
   };
 }
 
@@ -573,6 +546,6 @@ export async function revokeApiKey(_id: string): Promise<{
 }> {
   return {
     success: false,
-    message: 'TODO: Implement revokeApiKey',
+    message: 'Not implemented',
   };
 }

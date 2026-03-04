@@ -169,10 +169,7 @@ interface ApiResponse {
   };
 }
 
-/**
- * Check if a UUID already exists in the system
- * TODO: Replace with real API call to POST /api/validate
- */
+/** Check if a UUID already exists in the system */
 export const checkUuidExists = async (_uuid: string): Promise<{ exists: boolean; message: string }> => {
   // Mock: always return not exists
   await new Promise(resolve => setTimeout(resolve, 300));
@@ -182,10 +179,7 @@ export const checkUuidExists = async (_uuid: string): Promise<{ exists: boolean;
   };
 };
 
-/**
- * Submit invoice to the backend API
- * TODO: Replace with real API call to POST /api/invoice
- */
+/** Submit invoice to the backend */
 export const submitInvoice = async (formData: InvoiceData): Promise<{ 
   success: boolean; 
   message: string;
@@ -200,7 +194,7 @@ export const submitInvoice = async (formData: InvoiceData): Promise<{
 
     return {
       success: true,
-      message: '¡Factura enviada correctamente! (mock — conecta tu API backend)',
+      message: '¡Factura enviada correctamente! (mock)',
       data: {
         invoiceId: 'mock-' + Date.now(),
         uuid: formData.uuid,
@@ -215,10 +209,7 @@ export const submitInvoice = async (formData: InvoiceData): Promise<{
   }
 };
 
-/**
- * Check API health status
- * TODO: Replace with real API call to GET /api/health
- */
+/** Check API health status */
 export const checkApiHealth = async (): Promise<{
   healthy: boolean;
   services: { database: string; storage: string };

@@ -14,15 +14,11 @@ const defaultConfig: SystemConfig = {
 
 const SystemConfigContext = createContext<SystemConfig>(defaultConfig);
 
-/**
- * System Configuration Provider
- * TODO: Replace mock with real API call to GET /api/config
- */
+/** System Configuration Provider */
 export const SystemConfigProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [config, setConfig] = useState<SystemConfig>(defaultConfig);
 
   useEffect(() => {
-    // TODO: Fetch from real API
     // Mock: use defaults after simulated load
     const timer = setTimeout(() => {
       setConfig({

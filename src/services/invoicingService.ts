@@ -1,8 +1,7 @@
 /**
  * Invoicing Service
- * Frontend service for electronic invoicing operations
- * 
- * TODO: Implement real API calls. Currently returns mock data.
+ * Frontend service for electronic invoicing operations.
+ * Currently returns mock data for UI development.
  */
 
 // ============================================
@@ -205,19 +204,13 @@ const MOCK_ISSUED_INVOICES: InvoiceListItem[] = [
 // MOCK API FUNCTIONS
 // ============================================
 
-/**
- * Get current CSD status
- * TODO: Replace with real API call to GET /api/user/csd
- */
+/** Get current CSD status */
 export async function getCSDStatus(): Promise<CSDStatus> {
   await new Promise(resolve => setTimeout(resolve, 500));
   return MOCK_CSD_STATUS;
 }
 
-/**
- * Upload CSD files
- * TODO: Replace with real API call to POST /api/user/csd
- */
+/** Upload CSD files */
 export async function uploadCSD(
   _cerFile: File,
   _keyFile: File,
@@ -229,19 +222,12 @@ export async function uploadCSD(
   return { ...MOCK_CSD_STATUS, status: 'active', invoicingEnabled: true };
 }
 
-/**
- * Delete CSD
- * TODO: Replace with real API call to DELETE /api/user/csd
- */
+/** Delete CSD */
 export async function deleteCSD(): Promise<void> {
   await new Promise(resolve => setTimeout(resolve, 500));
-  console.warn('TODO: Implement deleteCSD with real backend');
 }
 
-/**
- * List issued invoices
- * TODO: Replace with real API call to GET /api/user/invoices/list
- */
+/** List issued invoices */
 export async function listInvoices(_options?: {
   page?: number;
   limit?: number;
@@ -266,10 +252,7 @@ export async function listInvoices(_options?: {
   };
 }
 
-/**
- * Create income invoice
- * TODO: Replace with real API call to POST /api/user/invoices/create?type=ingreso
- */
+/** Create income invoice */
 export async function createIncomeInvoice(
   _payload: CreateInvoicePayload
 ): Promise<InvoiceCreatedResponse> {
@@ -287,10 +270,7 @@ export async function createIncomeInvoice(
   };
 }
 
-/**
- * Create credit note
- * TODO: Replace with real API call to POST /api/user/invoices/create?type=egreso
- */
+/** Create credit note */
 export async function createCreditNote(
   _payload: CreateCreditNotePayload
 ): Promise<InvoiceCreatedResponse> {
@@ -307,10 +287,7 @@ export async function createCreditNote(
   };
 }
 
-/**
- * Create payment complement
- * TODO: Replace with real API call to POST /api/user/invoices/create?type=pago
- */
+/** Create payment complement */
 export async function createPaymentComplement(
   _payload: CreatePaymentComplementPayload
 ): Promise<InvoiceCreatedResponse> {
@@ -327,31 +304,22 @@ export async function createPaymentComplement(
   };
 }
 
-/**
- * Download invoice XML
- * TODO: Replace with real API call to GET /api/user/invoices/download?format=xml
- */
+/** Download invoice XML */
 export async function downloadInvoiceXml(_invoiceId: string): Promise<Blob> {
-  throw new Error('TODO: Implement downloadInvoiceXml — conecta tu API backend');
+  throw new Error('Not implemented');
 }
 
-/**
- * Download invoice PDF
- * TODO: Replace with real API call to GET /api/user/invoices/download?format=pdf
- */
+/** Download invoice PDF */
 export async function downloadInvoicePdf(_invoiceId: string): Promise<Blob> {
-  throw new Error('TODO: Implement downloadInvoicePdf — conecta tu API backend');
+  throw new Error('Not implemented');
 }
 
-/**
- * Cancel invoice
- * TODO: Replace with real API call to POST /api/user/invoices/cancel
- */
+/** Cancel invoice */
 export async function cancelInvoice(
   _invoiceId: string,
   _payload: CancellationPayload
 ): Promise<void> {
-  throw new Error('TODO: Implement cancelInvoice — conecta tu API backend');
+  throw new Error('Not implemented');
 }
 
 // ============================================

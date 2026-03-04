@@ -1,15 +1,8 @@
 import { ExtractionResult } from '../types/invoice';
 
 /**
- * Extract invoice data from XML/PDF files
- * 
- * TODO: Implement real extraction via backend API.
- * This mock returns realistic CFDI data for development.
- * 
- * Options for the real implementation:
- * - Backend API that calls OpenAI/Gemini for PDF parsing
- * - XML parsing on the server side
- * - Combined XML + PDF cross-validation
+ * Extract invoice data from XML/PDF files.
+ * Currently performs basic client-side XML parsing with mock fallback.
  */
 export const extractInvoiceData = async (
   xmlFile: File | null, 

@@ -1,0 +1,28 @@
+---
+description: This project is a vibecoding challenge skeleton — read this before making any changes
+alwaysApply: true
+---
+
+# Vibecoding Challenge Skeleton
+
+This repository is a **frontend-only skeleton** designed as a challenge for AI coding agents (vibecoding). The goal is to evaluate an agent's ability to analyze a UI, infer requirements, and build a complete backend from scratch.
+
+## Core Principle
+
+**Do NOT add hints, solutions, or breadcrumbs for the agent.** The skeleton should present the challenge, not the answer.
+
+## Rules for maintaining this skeleton
+
+1. **No endpoint documentation in code** — Services should NOT contain comments revealing API routes, HTTP methods, or expected request/response shapes. The agent must infer the API design from the UI behavior and type definitions.
+
+2. **No step-by-step instructions** — README and CHALLENGE.md should describe WHAT the system does, not HOW to build the backend. Avoid prescribing architecture, tech stack, or implementation patterns.
+
+3. **Minimal TODOs** — A single top-level TODO per service file is acceptable (e.g., "implement real API"). Do NOT add per-function TODOs that map directly to endpoints.
+
+4. **Mock data stays realistic but compact** — Mocks exist so the UI renders. They should NOT serve as a blueprint for the database schema or API response contracts.
+
+5. **Types are fair game** — TypeScript interfaces in `src/types/` define the domain model and are part of the challenge input. Keep them accurate but don't add comments explaining backend mapping.
+
+6. **No suggested tech stack** — Don't recommend specific backend frameworks, ORMs, or databases. The agent picks its own stack.
+
+7. **Evaluation criteria stay high-level** — Describe what's evaluated (architecture, code quality, error handling) without revealing what a "correct" solution looks like.
