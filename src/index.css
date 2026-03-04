@@ -1,0 +1,258 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================
+   TUFACTURA DESIGN SYSTEM
+   ============================================ */
+
+@layer base {
+  /* CSS Variables for Theme */
+  :root {
+    /* TuFactura Brand */
+    --color-primary: #FFD840;
+    --color-primary-dark: #FED330;
+    --color-primary-accent: #F29F05;
+    --color-primary-light: #FFF9E5;
+    
+    /* Light Theme */
+    --color-bg: #F5F7FB;
+    --color-bg-card: #FFFFFF;
+    --color-bg-elevated: #FFFFFF;
+    --color-text: #14142B;
+    --color-text-secondary: #4E4B66;
+    --color-text-muted: #A0A3BD;
+    --color-border: #D9DBE9;
+    --color-border-light: #EFF0F6;
+    
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
+    --shadow-tf: 0 4px 14px 0 rgba(255, 216, 64, 0.25);
+  }
+
+  /* Base styles */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* ============================================
+   CUSTOM SCROLLBAR
+   ============================================ */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-border-light);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-text-muted);
+  border-radius: 4px;
+  transition: background 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-secondary);
+}
+
+/* ============================================
+   COMPONENT UTILITIES
+   ============================================ */
+
+@layer components {
+  /* Card styles */
+  .card {
+    @apply bg-white rounded-2xl border border-tf-gray-light shadow-card transition-all duration-200;
+  }
+
+  .card-hover {
+    @apply hover:shadow-card-hover hover:-translate-y-0.5;
+  }
+
+  /* Input styles */
+  .input-base {
+    @apply w-full bg-white border-2 border-gray-200 rounded-xl py-2.5 px-4 outline-none transition-all duration-200 text-tf-black placeholder-gray-400;
+  }
+
+  .input-base:focus {
+    @apply border-tf-yellow ring-2 ring-tf-yellow/20;
+  }
+
+  .input-readonly {
+    @apply bg-gray-50 cursor-default text-gray-500;
+  }
+
+  /* Button styles */
+  .btn-primary {
+    @apply bg-tf-yellow hover:bg-tf-yellow-dark text-tf-black font-semibold py-3 px-6 rounded-xl shadow-tf hover:shadow-tf-lg transition-all duration-200 hover:-translate-y-0.5;
+  }
+
+  .btn-secondary {
+    @apply bg-gray-100 hover:bg-gray-200 text-tf-black font-medium py-2.5 px-5 rounded-xl transition-all duration-200;
+  }
+
+  .btn-ghost {
+    @apply text-gray-500 hover:text-tf-black hover:bg-gray-100 font-medium py-2 px-4 rounded-lg transition-all duration-200;
+  }
+
+  /* Section header */
+  .section-header {
+    @apply flex items-center gap-2 pb-2 border-b border-tf-gray-light;
+  }
+
+  .section-icon {
+    @apply bg-tf-yellow/20 text-tf-yellow-accent p-1.5 rounded-lg;
+  }
+
+  .section-title {
+    @apply font-bold text-tf-black text-lg;
+  }
+}
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up {
+  animation: slideUp 0.4s ease-out forwards;
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.2s ease-out forwards;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.animate-bounce {
+  animation: bounce 1.5s ease-in-out infinite;
+}
+
+/* Staggered animations for lists */
+.animate-stagger > * {
+  opacity: 0;
+  animation: slideUp 0.4s ease-out forwards;
+}
+
+.animate-stagger > *:nth-child(1) { animation-delay: 0.05s; }
+.animate-stagger > *:nth-child(2) { animation-delay: 0.1s; }
+.animate-stagger > *:nth-child(3) { animation-delay: 0.15s; }
+.animate-stagger > *:nth-child(4) { animation-delay: 0.2s; }
+.animate-stagger > *:nth-child(5) { animation-delay: 0.25s; }
+.animate-stagger > *:nth-child(6) { animation-delay: 0.3s; }
+
+/* ============================================
+   FOCUS STYLES
+   ============================================ */
+
+:focus-visible {
+  @apply outline-none ring-2 ring-tf-yellow ring-offset-2 ring-offset-white;
+}
+
+/* Selection */
+::selection {
+  @apply bg-tf-yellow/30 text-tf-black;
+}
+
+/* ============================================
+   UTILITY CLASSES
+   ============================================ */
+
+/* Hide scrollbar but keep functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Gradient text */
+.text-gradient {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-tf-yellow to-tf-yellow-accent;
+}
+
+/* Glass effect */
+.glass {
+  @apply bg-white/80 backdrop-blur-xl border border-white/20;
+}

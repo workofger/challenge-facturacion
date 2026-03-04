@@ -1,0 +1,296 @@
+import { useState, useCallback, useRef, useEffect } from 'react';
+import { InvoiceData } from '../types/invoice';
+import { extractInvoiceData } from '../services/openaiService';
+import { extractUuidFromXml, validateMatchingFilenames } from '../utils/xmlParser';
+import { validateInvoiceWeek, BillingPeriodType } from '../utils/weekValidation';
+
+export interface ValidationAlert {
+  type: 'error' | 'warning' | 'info';
+  title: string;
+  message: string;
+  details?: string;
+}
+
+interface UseInvoiceExtractionProps {
+  formData: InvoiceData;
+  setFormData: React.Dispatch<React.SetStateAction<InvoiceData>>;
+  projects: Array<{ code: string; name: string; billing_period_type?: BillingPeriodType }>;
+  onValidationAlert?: (alert: ValidationAlert) => void;
+}
+
+// Maximum number of extraction attempts per file pair
+const MAX_EXTRACTION_ATTEMPTS = 1;
+
+export const useInvoiceExtraction = ({ 
+  formData, 
+  setFormData, 
+  projects,
+  onValidationAlert 
+}: UseInvoiceExtractionProps) => {
+  const [isExtracting, setIsExtracting] = useState(false);
+  const [extractError, setExtractError] = useState<string | null>(null);
+  const [extractSuccess, setExtractSuccess] = useState(false);
+  const [isValidating, setIsValidating] = useState(false);
+  
+  // Track extraction attempts with both ref (for sync checks) and state (for effect deps)
+  const extractionAttemptsRef = useRef<Map<string, number>>(new Map());
+  const [attemptedFileKey, setAttemptedFileKey] = useState<string | null>(null);
+  
+  // Flag to prevent any extraction while one is in progress
+  const isProcessingRef = useRef(false);
+
+  // Generate a unique key for current file pair
+  const getFileKey = useCallback((xmlFile: File | null, pdfFile: File | null): string | null => {
+    if (!xmlFile || !pdfFile) return null;
+    return `${xmlFile.name}-${xmlFile.size}-${pdfFile.name}-${pdfFile.size}`;
+  }, []);
+
+  // Check if UUID already exists in database
+  const checkUuidExists = useCallback(async (uuid: string): Promise<boolean> => {
+    try {
+      const response = await fetch('/api/validate', {
+        credentials: 'include',
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ uuid })
+      });
+      const data = await response.json();
+      return data.exists === true;
+    } catch (error) {
+      console.error('Error checking UUID:', error);
+      return false;
+    }
+  }, []);
+
+  // Validate project exists in database
+  const validateProject = useCallback((projectName: string): boolean => {
+    if (!projectName || projects.length === 0) return true;
+    
+    const normalizedName = projectName.toUpperCase().replace(/ /g, '_');
+    return projects.some(p => 
+      p.code.toUpperCase() === normalizedName || 
+      p.name.toUpperCase() === projectName.toUpperCase()
+    );
+  }, [projects]);
+
+  // Check if extraction can be attempted
+  const canAttemptExtraction = useCallback((): boolean => {
+    if (!formData.xmlFile || !formData.pdfFile) return false;
+    if (isProcessingRef.current) return false;
+    
+    const currentFileKey = getFileKey(formData.xmlFile, formData.pdfFile);
+    if (!currentFileKey) return false;
+    
+    const attempts = extractionAttemptsRef.current.get(currentFileKey) || 0;
+    return attempts < MAX_EXTRACTION_ATTEMPTS;
+  }, [formData.xmlFile, formData.pdfFile, getFileKey]);
+
+  const handleExtraction = useCallback(async () => {
+    // Double-check we can attempt extraction
+    if (!formData.xmlFile || !formData.pdfFile) {
+      console.log('⚠️ No files to extract');
+      return;
+    }
+    
+    // Prevent concurrent extractions
+    if (isProcessingRef.current) {
+      console.log('⚠️ Extraction already in progress, skipping');
+      return;
+    }
+    
+    const currentFileKey = getFileKey(formData.xmlFile, formData.pdfFile);
+    if (!currentFileKey) return;
+    
+    // Check attempt count BEFORE starting
+    const currentAttempts = extractionAttemptsRef.current.get(currentFileKey) || 0;
+    if (currentAttempts >= MAX_EXTRACTION_ATTEMPTS) {
+      console.log(`⚠️ Max extraction attempts (${MAX_EXTRACTION_ATTEMPTS}) reached for these files`);
+      return;
+    }
+    
+    // Mark as processing IMMEDIATELY to prevent race conditions
+    isProcessingRef.current = true;
+    
+    // Increment attempt counter IMMEDIATELY
+    extractionAttemptsRef.current.set(currentFileKey, currentAttempts + 1);
+    setAttemptedFileKey(currentFileKey);
+    
+    console.log(`📋 Starting extraction attempt ${currentAttempts + 1}/${MAX_EXTRACTION_ATTEMPTS} for: ${currentFileKey}`);
+    
+    // Step 1: Validate filenames match
+    const filenameValidation = validateMatchingFilenames(formData.xmlFile, formData.pdfFile);
+    if (!filenameValidation.valid) {
+      onValidationAlert?.({
+        type: 'error',
+        title: 'Nombres de archivo no coinciden',
+        message: filenameValidation.error || 'Los archivos XML y PDF deben tener el mismo nombre.'
+      });
+      isProcessingRef.current = false;
+      return;
+    }
+
+    setIsValidating(true);
+    setExtractError(null);
+
+    try {
+      // Step 2: Extract UUID from XML (quick, no AI)
+      const uuid = await extractUuidFromXml(formData.xmlFile);
+      
+      if (uuid) {
+        // Step 3: Check if UUID exists in database
+        const exists = await checkUuidExists(uuid);
+        if (exists) {
+          setIsValidating(false);
+          isProcessingRef.current = false;
+          onValidationAlert?.({
+            type: 'error',
+            title: 'Factura ya registrada',
+            message: 'Esta factura ya fue cargada anteriormente en el sistema.',
+            details: `UUID: ${uuid}`
+          });
+          return;
+        }
+      }
+    } catch (error) {
+      console.error('Pre-validation error:', error);
+      // Continue with extraction even if pre-validation fails
+    }
+
+    setIsValidating(false);
+    setIsExtracting(true);
+
+    try {
+      const data = await extractInvoiceData(formData.xmlFile, formData.pdfFile);
+      
+      // Step 4: Validate project exists
+      if (data.project && !validateProject(data.project)) {
+        onValidationAlert?.({
+          type: 'error',
+          title: 'Proyecto no reconocido',
+          message: `El proyecto "${data.project}" no está registrado en el sistema. Contacta al administrador.`,
+        });
+        setIsExtracting(false);
+        isProcessingRef.current = false;
+        return;
+      }
+
+      // Step 5: Validate invoice week is still active
+      // Get billing_period_type from the detected project
+      if (data.invoiceDate) {
+        const detectedProject = projects.find(p => 
+          p.code.toUpperCase() === data.project?.toUpperCase().replace(/ /g, '_') ||
+          p.name.toUpperCase() === data.project?.toUpperCase()
+        );
+        const billingPeriodType: BillingPeriodType = detectedProject?.billing_period_type || 'standard';
+        
+        const weekValidation = validateInvoiceWeek(data.invoiceDate, billingPeriodType);
+        if (!weekValidation.valid) {
+          onValidationAlert?.({
+            type: 'warning',
+            title: 'Carga Extemporánea',
+            message: 'Esta factura corresponde a una semana fuera del período regular. Se programará para pago extemporáneo.',
+            details: `Semana ${weekValidation.week} del ${weekValidation.year}`,
+          });
+          // Don't return - allow upload but flag as late payment
+        }
+      }
+
+      // All validations passed (or non-blocking) - update form data
+      setFormData(prev => ({
+        ...prev,
+        // Issuer
+        issuerRfc: data.issuerRfc || prev.issuerRfc,
+        issuerName: data.issuerName || prev.issuerName,
+        issuerRegime: data.issuerRegime || prev.issuerRegime,
+        issuerZipCode: data.issuerZipCode || prev.issuerZipCode,
+        
+        // Receiver
+        receiverRfc: data.receiverRfc || prev.receiverRfc,
+        receiverName: data.receiverName || prev.receiverName,
+        receiverRegime: data.receiverRegime || prev.receiverRegime,
+        receiverZipCode: data.receiverZipCode || prev.receiverZipCode,
+        cfdiUse: data.cfdiUse || prev.cfdiUse,
+        
+        // Selection
+        project: data.project || prev.project,
+        weekFromDescription: data.weekFromDescription,
+        
+        // Invoice ID
+        invoiceDate: data.invoiceDate || prev.invoiceDate,
+        folio: data.folio || prev.folio,
+        series: data.series || prev.series,
+        uuid: data.uuid || prev.uuid,
+        certificationDate: data.certificationDate || prev.certificationDate,
+        satCertNumber: data.satCertNumber || prev.satCertNumber,
+        
+        // Payment
+        paymentMethod: data.paymentMethod || prev.paymentMethod,
+        paymentForm: data.paymentForm || prev.paymentForm,
+        paymentConditions: data.paymentConditions || prev.paymentConditions,
+        
+        // Financial
+        subtotal: data.subtotal ? data.subtotal.toString() : prev.subtotal,
+        totalTax: data.totalTax ? data.totalTax.toString() : prev.totalTax,
+        retentionIva: data.retentionIva ? data.retentionIva.toString() : prev.retentionIva,
+        retentionIvaRate: data.retentionIvaRate || 0,
+        retentionIsr: data.retentionIsr ? data.retentionIsr.toString() : prev.retentionIsr,
+        retentionIsrRate: data.retentionIsrRate || 0,
+        totalAmount: data.totalAmount ? data.totalAmount.toString() : prev.totalAmount,
+        currency: data.currency || prev.currency,
+        exchangeRate: data.exchangeRate || prev.exchangeRate,
+        
+        // Items
+        items: data.items || [],
+        
+        // Contact
+        email: data.email || prev.email,
+      }));
+      
+      setExtractSuccess(true);
+      console.log('✅ Extraction completed successfully');
+      
+    } catch (error) {
+      console.error('❌ Error en extracción:', error);
+      
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+      setExtractError(`No se pudieron extraer los datos: ${errorMessage}. Por favor llena los campos manualmente.`);
+      
+      // Show user-friendly error for common issues
+      if (errorMessage.includes('OPENAI_API_KEY') || errorMessage.includes('not configured')) {
+        setExtractError('Error de configuración del servidor. Contacta al administrador.');
+      }
+    } finally {
+      setIsExtracting(false);
+      isProcessingRef.current = false;
+    }
+  }, [formData.xmlFile, formData.pdfFile, setFormData, checkUuidExists, validateProject, onValidationAlert, getFileKey]);
+
+  // Reset extraction state when files change
+  useEffect(() => {
+    const currentFileKey = getFileKey(formData.xmlFile, formData.pdfFile);
+    
+    // If files changed, reset success/error but keep attempt tracking
+    if (currentFileKey !== attemptedFileKey && attemptedFileKey !== null) {
+      setExtractSuccess(false);
+      setExtractError(null);
+    }
+  }, [formData.xmlFile, formData.pdfFile, attemptedFileKey, getFileKey]);
+
+  const resetExtraction = useCallback(() => {
+    setExtractSuccess(false);
+    setExtractError(null);
+    setAttemptedFileKey(null);
+    extractionAttemptsRef.current.clear();
+    isProcessingRef.current = false;
+  }, []);
+
+  return {
+    isExtracting,
+    isValidating,
+    extractError,
+    extractSuccess,
+    handleExtraction,
+    resetExtraction,
+    canAttemptExtraction,
+  };
+};
